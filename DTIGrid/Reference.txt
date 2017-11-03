@@ -1,0 +1,19 @@
+The possible values for the sorttype are: 
+----------------------------------------------------
+int - the data is interpreted as integer, 
+float - the data is interpreted as decimal number 
+date - the data is interpreted as data 
+text - the data is interpreted as text
+
+The possible values for the edittype are: 
+----------------------------------------------------
+text
+textarea
+select
+checkbox
+password
+
+*added "//dti -" convention for marking changes in javascript
+
+*minimized the files into jqGrid.min.js --this is created by DTI
+	*NOTE - it has the english locale file in it. 
