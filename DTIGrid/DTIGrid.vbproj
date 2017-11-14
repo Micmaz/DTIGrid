@@ -52,10 +52,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DTIControls, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DTIControls.dll.1.0.3\lib\DTIControls.dll</HintPath>
-    </Reference>
-    <Reference Include="SQLiteHelper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DTIControls.dll.1.0.3\lib\SQLiteHelper.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\DTIControls\_Output\DTIControls.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -97,12 +95,7 @@
     <EmbeddedResource Include="js\DTIDataGrid.js" />
     <EmbeddedResource Include="js\jquery.layout.js" />
     <EmbeddedResource Include="js\jquery.timepicker.js" />
-    <EmbeddedResource Include="js\jqueryTimepicker.css" />
     <EmbeddedResource Include="js\jquery.jqgrid.min.js" />
-    <Content Include="My Project\Application.myapp">
-      <Generator>MyApplicationCodeGenerator</Generator>
-      <LastGenOutput>Application.Designer.vb</LastGenOutput>
-    </Content>
     <Content Include="Reference.txt" />
     <EmbeddedResource Include="js\ui.jqgrid.css" />
     <EmbeddedResource Include="themes\themes.ui.multiselect.css" />
@@ -117,10 +110,6 @@
     <Compile Include="DTIGridColumnCollection.vb" />
     <Compile Include="DTIGridRow.vb" />
     <Compile Include="DTIGridRowCollection.vb" />
-    <Compile Include="My Project\Application.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Application.myapp</DependentUpon>
-    </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>
   <ItemGroup>

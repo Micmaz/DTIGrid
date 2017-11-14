@@ -34,7 +34,20 @@ Public Class DTIDataGrid
         End Set
     End Property
 
-    Private ReadOnly Property sqlhelper() As BaseClasses.BaseHelper
+	Private Property searchVal() As Object
+		Get
+
+			If ViewState(Me.ClientID & "_SearchVal") Is Nothing Then
+				ViewState(Me.ClientID & "_SearchVal") = ""
+			End If
+			Return ViewState(Me.ClientID & "_SearchVal")
+		End Get
+		Set(ByVal value As Object)
+			ViewState(Me.ClientID & "_SearchVal") = value
+		End Set
+	End Property
+
+	Private ReadOnly Property sqlhelper() As BaseClasses.BaseHelper
         Get
             Return DataBase.getHelper
         End Get
@@ -139,26 +152,26 @@ Public Class DTIDataGrid
     End Property
 
 
-    Private _paramArr() As Object = Nothing
+	Private _paramArr As List(Of Object) = New List(Of Object)
 
-    ''' <summary>
-    ''' When Setting DataSource to a Table name or a query and addition params object can be passed
-    ''' for safe filtering
-    ''' </summary>
-    ''' <value></value>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("When Setting DataSource to a Table name or a query and addition params object can be passed   for safe filtering")> _
-    Public Property DataTableParamArray() As Object
-        Get
-            Return _paramArr
-        End Get
-        Set(ByVal value As Object)
-            _paramArr = value
-        End Set
-    End Property
+	''' <summary>
+	''' When Setting DataSource to a Table name or a query and addition params object can be passed
+	''' for safe filtering
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("When Setting DataSource to a Table name or a query and addition params object can be passed   for safe filtering")>
+	Public Property DataTableParamArray() As List(Of Object)
+		Get
+			Return _paramArr
+		End Get
+		Set(ByVal value As List(Of Object))
+			_paramArr = value
+		End Set
+	End Property
 
-    Private _customEvents As Boolean = False
+	Private _customEvents As Boolean = False
 
     ''' <summary>
     ''' 
@@ -390,104 +403,106 @@ Public Class DTIDataGrid
     End Sub
 
     Private firstFetched As Boolean = True
-    Public Function fetchdata(Optional ByVal allowRefetch = True) As Boolean
-        Dim retval As Boolean = True
-        If allowRefetch OrElse firstFetched Then
-            firstFetched = False
-            If _dataTableName <> "" Then
-                DataSource = New DataTable
-            ElseIf DataSource Is Nothing Then
-                'Nothing was set
-                DataSource = New DataTable
-                Exit Function
-            End If
-            Try
-                If EnableEditing OrElse EnableSorting OrElse EnablePaging Then
-                    'Dim n As String = getTableName()
-                    'Dim da As System.Data.Common.DbDataAdapter = GridHelper.Adaptor(n)
-                    'da.FillSchema(dt, SchemaType.Mapped)
-                End If
-            Catch ex As Exception
-                If EnableEditing Then
-                    'dataError(New Exception("Could not enable editing.<br>" & ex.Message))
-                End If
-                retval = False
-                Me.EnableEditing = False
-            End Try
+	Public Function fetchdata(Optional ByVal allowRefetch As Boolean = True) As Boolean
+		Dim retval As Boolean = True
+		If allowRefetch OrElse firstFetched Then
+			If _dataTableName <> "" Then
+				DataSource = New DataTable
+			ElseIf DataSource Is Nothing Then
+				'Nothing was set
+				DataSource = New DataTable
+				Exit Function
+			End If
+			Try
+				If EnableEditing OrElse EnableSorting OrElse EnablePaging Then
+					'Dim n As String = getTableName()
+					'Dim da As System.Data.Common.DbDataAdapter = GridHelper.Adaptor(n)
+					'da.FillSchema(dt, SchemaType.Mapped)
+				End If
+			Catch ex As Exception
+				If EnableEditing Then
+					'dataError(New Exception("Could not enable editing.<br>" & ex.Message))
+				End If
+				retval = False
+				Me.EnableEditing = False
+			End Try
 
-            'setpk()
+			'setpk()
 
-            'if Datatable name is set handling any sorting errors is up to the user
-            'Sorting errors only occur with switching out grid object with different datatables.
-            'If dt.Columns(SortColumn) Is Nothing AndAlso Not _dataTableName.StartsWith("(") AndAlso retval Then
-            '    SortColumn = ""
-            '    SortOrder = ""
-            'End If
+			'if Datatable name is set handling any sorting errors is up to the user
+			'Sorting errors only occur with switching out grid object with different datatables.
+			'If dt.Columns(SortColumn) Is Nothing AndAlso Not _dataTableName.StartsWith("(") AndAlso retval Then
+			'    SortColumn = ""
+			'    SortOrder = ""
+			'End If
+			If firstFetched Then
+				If Not String.IsNullOrEmpty(searchVal) Then DataTableParamArray.Add(searchVal)
+			End If
+			If Me._dataTableName <> "" AndAlso Not _returnSavedDt Then
+				Try
+					If dt Is Nothing Then DataSource = New DataTable
+					dt.Clear()
+					If Not EnablePaging Then
+						Try
+							If isSelect(_dataTableName) Then
+								FillTablePasser(originalTableName, dt)
+								Me.PageSize = dt.Rows.Count
+							Else
+								GridHelper.FillDataTable("Select top 100 * from " & _dataTableName, dt, DataTableParamArray.ToArray())
+								If PageSize = 100 Then
+									dataError(New Exception("Only the first 100 rows from the table are displayed."))
+								End If
+							End If
+						Catch ex As Exception
+							dataError(ex)
+						End Try
+					Else
+						PageCount = GridHelper.GetSortedPage(dt, _dataTableName, PageSize, PageIndex, pk, SortString, searchString, DataTableParamArray.ToArray())
+						If dt.Rows.Count = 0 AndAlso PageCount < PageIndex Then
+							PageIndex = 1
+							PageCount = GridHelper.GetSortedPage(dt, _dataTableName, PageSize, PageIndex, pk, SortString, searchString, DataTableParamArray.ToArray())
+						End If
+					End If
+				Catch ex As Exception
+					dataError(ex)
+					'EnablePaging = False
+					retval = False
+					Try
+						If isSelect(_dataTableName) Then
+							FillTablePasser(originalTableName, dt)
+							Me.PageSize = dt.Rows.Count
+							'GridHelper.FillDataTable(originalTableName, l.ToArray)
+						Else
+							GridHelper.FillDataTable("Select top 100 * from " & _dataTableName, dt, DataTableParamArray.ToArray())
+							Me.PageSize = dt.Rows.Count
+						End If
+						If EnableEditing AndAlso (Me.DataTableKey = "" OrElse dt.Columns(Me.DataTableKey) Is Nothing) Then
+							dataError(ex)
+							dataError(New Exception("The datatable key: " & DataTableKey & " was not found in the returned table. Editing and paging are disabled."))
+							'Me.EnableEditing = False
+							'Me.EnablePaging = False
+							'Me.EnableSearching = False
+						End If
+					Catch ex1 As Exception
+						dataError(ex)
+						dataError(ex1)
+					End Try
+				End Try
+			End If
+			DataSource = dt
+			Try
+				If Not titleSet Then _title = dt.TableName
+			Catch ex As Exception
 
-            If Me._dataTableName <> "" AndAlso Not _returnSavedDt Then
-                Try
-                    If dt Is Nothing Then DataSource = New DataTable
-                    dt.Clear()
-                    If Not EnablePaging Then
-                        Try
-                            If isSelect(_dataTableName) Then
-                                FillTablePasser(originalTableName, dt)
-                                Me.PageSize = dt.Rows.Count
-                            Else
-                                GridHelper.FillDataTable("Select top 100 * from " & _dataTableName, dt, DataTableParamArray)
-                                If PageSize = 100 Then
-                                    dataError(New Exception("Only the first 100 rows from the table are displayed."))
-                                End If
-                            End If
-                        Catch ex As Exception
-                            dataError(ex)
-                        End Try
-                    Else
-                        PageCount = GridHelper.GetSortedPage(dt, _dataTableName, PageSize, PageIndex, pk, SortString, searchString, DataTableParamArray)
-                        If dt.Rows.Count = 0 AndAlso PageCount < PageIndex Then
-                            PageIndex = 1
-                            PageCount = GridHelper.GetSortedPage(dt, _dataTableName, PageSize, PageIndex, pk, SortString, searchString, DataTableParamArray)
-                        End If
-                    End If
-                Catch ex As Exception
-                    dataError(ex)
-                    'EnablePaging = False
-                    retval = False
-                    Try
-                        If isSelect(_dataTableName) Then
-                            FillTablePasser(originalTableName, dt)
-                            Me.PageSize = dt.Rows.Count
-                            'GridHelper.FillDataTable(originalTableName, l.ToArray)
-                        Else
-                            GridHelper.FillDataTable("Select top 100 * from " & _dataTableName, dt, DataTableParamArray)
-                            Me.PageSize = dt.Rows.Count
-                        End If
-                        If EnableEditing AndAlso (Me.DataTableKey = "" OrElse dt.Columns(Me.DataTableKey) Is Nothing) Then
-                            dataError(ex)
-                            dataError(New Exception("The datatable key: " & DataTableKey & " was not found in the returned table. Editing and paging are disabled."))
-                            'Me.EnableEditing = False
-                            'Me.EnablePaging = False
-                            'Me.EnableSearching = False
-                        End If
-                    Catch ex1 As Exception
-                        dataError(ex)
-                        dataError(ex1)
-                    End Try
-                End Try
-            End If
-            DataSource = dt
-            Try
-                If Not titleSet Then _title = dt.TableName
-            Catch ex As Exception
+			End Try
+			firstFetched = False
+			RaiseEvent DataFetched(dt)
+		End If
 
-            End Try
-            RaiseEvent DataFetched(dt)
-        End If
+		Return retval
+	End Function
 
-        Return retval
-    End Function
-
-    Private ReadOnly Property pk() As String
+	Private ReadOnly Property pk() As String
         Get
             If DataTableKey <> "" Then
                 Return DataTableKey
@@ -725,25 +740,36 @@ Public Class DTIDataGrid
         Binding(True)
     End Sub
 
-    Private Sub DTIGrid_SearchData(ByVal columnName As String, ByVal SearchValue As String) Handles Me.Searching
-        If DataTableName = "" Then
-            DataTableName = CType(Me.SavedGrid, DTIDataGrid).DataTableName
-        End If
-        If Not CustomSearchEvents Then 'AndAlso Not isCancelClicked Then
-            If columnName.Trim = "" OrElse SearchValue.Length = 0 Then
-                searchString = ""
-            Else
-                If Not (SearchValue.StartsWith("""") AndAlso SearchValue.EndsWith("""")) Then
-                    SearchValue = "%" & SearchValue & "%"
-                End If
-                searchString = columnName & " LIKE '" & SearchValue & "'"
-            End If
-            Me.Binding(True)
-        End If
-        RaiseEvent SearchRequest(columnName, SearchValue)
-    End Sub
+	Private Sub DTIGrid_SearchData(ByVal columnName As String, ByVal mySearchValue As String) Handles Me.Searching
+		If DataTableName = "" Then
+			DataTableName = CType(Me.SavedGrid, DTIDataGrid).DataTableName
+		End If
+		If Not CustomSearchEvents Then 'AndAlso Not isCancelClicked Then
+			searchVal = mySearchValue
+			searchString = ""
+			If Not (searchVal.StartsWith("""") AndAlso searchVal.EndsWith("""")) Then
+				searchVal = "%" & searchVal & "%"
+			End If
+			If searchVal.Length = 0 Then
+				searchString = ""
+			Else
+				If columnName.Contains(",") Then
+					For Each val As String In columnName.Split(",")
+						searchString &= val & " LIKE @searchval OR "
+					Next
+					If searchString.EndsWith("OR ") Then
+						searchString = searchString.Substring(0, searchString.LastIndexOf("OR "))
+					End If
+				Else
+					searchString = columnName & " LIKE @searchval "
+				End If
+			End If
+			Me.Binding(True)
+		End If
+		RaiseEvent SearchRequest(columnName, searchVal)
+	End Sub
 
-    Private Sub DTIGrid_SortData(ByVal columnName As String, ByVal sortOrder As String, ByVal SearchColumn As String, ByVal SearchValue As String) Handles MyBase.Sorting
+	Private Sub DTIGrid_SortData(ByVal columnName As String, ByVal sortOrder As String, ByVal SearchColumn As String, ByVal SearchValue As String) Handles MyBase.Sorting
         If Not CustomSortEvents Then 'AndAlso Not isCancelClicked Then
             Me.SortOrder = sortOrder
             Me.SortColumn = columnName

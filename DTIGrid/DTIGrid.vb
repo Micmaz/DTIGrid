@@ -117,8 +117,9 @@ Public Class DTIGrid
     Protected hfDeletedRows As New HiddenField
     Protected hfPageCommand As New HiddenField
 
-    Private script As New ScriptBlock
-    Private _columns As DTIGridColumnCollection
+	Private script As New LiteralControl
+
+	Private _columns As DTIGridColumnCollection
     Private _rows As DTIGridRowCollection
     Private _selectedRows As DTIGridRowCollection
     Private _updatedRows As DTIGridRowCollection
@@ -861,6 +862,7 @@ Public Class DTIGrid
 		pnlSearch.Controls.Add(tbSearch)
 		pnlSearch.Controls.Add(cbSearch)
 		pnlSearch.Controls.Add(btnSearch)
+		pnlSearch.CssClass = "ui-widget"
 		'pnlSearch.DefaultButton = btnSearch.ClientID
 
 		Me.Controls.Add(pnlSearch)
@@ -890,20 +892,20 @@ Public Class DTIGrid
 		Me.Controls.Add(script)
 		Me.Controls.Add(btnRowSelect)
 		Me.Controls.Add(btnSort)
+		Me.CssClass = "DTIGrid"
 	End Sub
 
 	Protected Overridable Sub changeInnerControlIds()
 		If String.IsNullOrEmpty(Me.ID) Then
 			Me.ID = Me.ClientID.Substring(Me.ClientID.LastIndexOf("_") + 1)
 		End If
-
 		tbl.ID = Me.ID & "_Table"
 		postbackData.ID = Me.ID & "_Hidden"
 		sPostbackData.ID = Me.ID & "_sHidden"
 		hfSelectedRows.ID = Me.ID & "_SelectedRowsHidden"
 		hfDeletedRows.ID = Me.ID & "_DeletedRowsHidden"
 		hfPageCommand.ID = Me.ID & "_PageCommand"
-		script.ID = Me.ID & "_Script"
+		'script.ID = Me.ID & "_Script"
 		btnRowSelect.ID = Me.ID & "_RowSelect"
 		btnSort.ID = Me.ID & "_Sort"
 		pnlSearch.ID = Me.ID & "_SearchDiv"
@@ -984,7 +986,8 @@ Public Class DTIGrid
 	End Sub
 
 	Private Sub DTIGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
-		jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
+		'jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
+		jQueryLibrary.jQueryInclude.RegisterJQueryUI(Page)
 		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-3.8.2.min.js", , True)
 		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.1.2.min.js", , True)
 		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.5.2.min.js", , True)
@@ -1122,6 +1125,14 @@ Public Class DTIGrid
 		AddButtonJquery(btnSearch, btnPrev, btnNext, btnFirst, btnLast)
 
 		If EnableSearching Then
+			Dim allCols As String = ""
+
+			For Each col As DTIGridColumn In Me.Columns
+				If col.Visible AndAlso col.DataType.ToString().Substring(7).StartsWith("String") Then _
+					allCols &= col.ColumnHeader & ","
+			Next
+			allCols = allCols.Trim(",")
+			ddlSearch.Items.Add(New ListItem("", allCols))
 			For Each col As DTIGridColumn In Me.Columns
 				With col
 					If col.Visible Then
@@ -1144,6 +1155,9 @@ Public Class DTIGrid
 			DataBind()
 		End If
 		errorDiv.Visible = errorDiv.isError
+		If Not Me.renderAsTable Then
+			setScript()
+		End If
 	End Sub
 
 	Protected Overrides Sub Render(ByVal writer As System.Web.UI.HtmlTextWriter)
@@ -1187,7 +1201,7 @@ Public Class DTIGrid
 			phgridarea.Controls.Add(New LiteralControl(s))
 		Else
 			'Page.ClientScript.RegisterOnSubmitStatement(Me.GetType, Me.ClientID & "SaveRowInformation", "    dtiGetGridData('" & Me.ClientID & "');")
-			setScript()
+			'setScript()
 			'End If
 		End If
 		SavedGrid = Me
@@ -1333,7 +1347,7 @@ Public Class DTIGrid
 		End If
 		If EnableSearching Then
 			ddlSearch.Items.Clear()
-			ddlSearch.Items.Add("")
+			'ddlSearch.Items.Add("")
 			If ddlSearch.SelectedValue.IndexOf("Boolean") > -1 Then
 				tbSearch.Style.Add("display", "none")
 				cbSearch.Style.Remove("display")
@@ -1388,140 +1402,143 @@ Public Class DTIGrid
 		RaiseEvent DataBound()
 	End Sub
 
+	Private Function getScript() As String
+		Dim ScriptText As String = ""
+		ScriptText = ""
+		ScriptText &= "var " & Me.ClientID & "_data = " & Me.Rows.ToString & vbCrLf
+		ScriptText &= "var " & Me.ClientID & "_lastsel;"
+		ScriptText &= "var " & Me.ID & " = $('#" & Me.tbl.ClientID & "').jqGrid({"
+		ScriptText &= "datatype: 'local'," & vbCrLf
+		ScriptText &= "data: " & Me.ClientID & "_data," & vbCrLf
+		ScriptText &= "rowNum: " & rowCount & "," & vbCrLf
+		If Height.Value > 0 AndAlso Not (Height.Value = 100.0 AndAlso Height.Type = UnitType.Percentage) Then
+			ScriptText &= "height: " & Height.Value & ","
+		Else
+			ScriptText &= "height: 'auto',"
+		End If
+		If Width.Value > 0 Then
+			ScriptText &= "width: " & Width.Value & ","
+		End If
+		If EnableAltRows Then
+			ScriptText &= "altRows: true,"
+			If AltRowsCssClass <> "" Then
+				ScriptText &= "altclass: '" & AltRowsCssClass & "',"
+			End If
+		End If
+		'.ScriptText &= "url:'local'," & vbCrLf
+		ScriptText &= "editurl:''," & vbCrLf
+		If Not ShrinkToFit Then
+			ScriptText &= "shrinkToFit:false," & vbCrLf
+		End If
+		'If dt IsNot Nothing Then
+		ScriptText &= "colNames:" & Me.Columns.ColumnHeadersString
+		ScriptText &= "colModel:" & Me.Columns.ToString
+		'End If
+		'.ScriptText &= "gridComplete: loadCompleteFunction('" & Me.tbl.ClientID & "'),"
+		'.ScriptText &= "emptyDataText:  'There are no records. If you would like to add one, click the ""Add New ..."" button below.',"
+		If EnableEditing Then
+			'.ScriptText &= "'cellEdit': true,'cellsubmit' : 'clientArray'," & vbCrLf
+			ScriptText &= "editurl: 'clientArray'," & vbCrLf
+			'cellEdit': true,
+			'cellsubmit' : 'clientArray',
+		End If
+		ScriptText &= "onSelectRow: function(id){" & vbCrLf
+		If EnableEditing Then
+			ScriptText &= " dtiSelectRow('" & Me.ClientID & "',id,true);" & vbCrLf
+		End If
+
+		If AutoPostBack Then
+			ScriptText &= "    dtiGetGridData('" & Me.ClientID & "');" & vbCrLf
+		End If
+		'.ScriptText &= "    if(id && id!==" & Me.ClientID & "_lastsel){ " & vbCrLf
+		'If EnableEditing Then
+		'    .ScriptText &= "        $('#" & Me.tbl.ClientID & "').jqGrid('editRow',id, true, " & Me.ClientID & "_datesHandle, false,'clientArray',false,function(){dtiSaveGrid('" & Me.ClientID & "');});" & vbCrLf
+		'End If
+		If Not String.IsNullOrEmpty(OnClientRowSelect) Then
+			ScriptText &= OnClientRowSelect.Trim(";") & ";" & vbCrLf
+		End If
+		'.ScriptText &= "        " & Me.ClientID & "_lastsel=id;" & vbCrLf
+		'.ScriptText &= "    }" & vbCrLf
+		If AutoPostBack Then
+			ScriptText &= "    $('#" & Me.btnRowSelect.ClientID & "').click();" & vbCrLf
+		End If
+		ScriptText &= "},"
+		If EnableSorting Then
+			ScriptText &= "onSortCol: dtiSortHandler," '{"
+		End If
+		If MultiSelect Then _
+			ScriptText &= "multiselect: true,"
+		If Not String.IsNullOrEmpty(SortColumn) Then _
+			ScriptText &= "sortname: """ & SortColumn & ""","
+		ScriptText &= "sortorder: """ & SortOrder & ""","
+		If Title Is Nothing OrElse Title.ToLower = "table1" Then
+			If dt IsNot Nothing Then
+				ScriptText &= "caption: """ & dt.TableName & """"
+			End If
+		Else
+			ScriptText &= "caption: """ & Title & """"
+		End If
+		ScriptText &= "});" & vbCrLf
+
+		If Me.rowCount > Me.PageSize Then
+			ScriptText &= "var " & Me.ClientID & "_startrow = " & Me.PageSize * (PageIndex - 1) & ";" & vbCrLf
+			If Me.PageIndex = Me.PageCount Then
+				ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
+			Else
+				ScriptText &= "var " & Me.ClientID & "_endrow = " & (Me.PageSize * PageIndex) - 1 & ";" & vbCrLf
+			End If
+		Else
+			ScriptText &= "var " & Me.ClientID & "_startrow = 0;" & vbCrLf
+			ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
+		End If
+
+		'ScriptText &= "for(var i=" & Me.ClientID & "_startrow;i<=" & Me.ClientID & "_endrow;i++){"
+		'ScriptText &= "$('#" & Me.tbl.ClientID & "').jqGrid('addRowData',i+1," & Me.ClientID & "_data[i]);} "
+		ScriptText &= "function " & Me.ClientID & "_datesHandle(id){ "
+		For Each column As DTIGridColumn In Me.Columns
+			If column.DataType Is GetType(DateTime) Then
+				If Not ShowDateAndTime Then
+					ScriptText &= "$('#'+id+'_" & column.Name & "','#" & Me.tbl.ClientID & "').datepicker({changeMonth: true,changeYear: true});"
+				Else
+					ScriptText &= "$('#'+id+'_" & column.Name & "','#" & Me.tbl.ClientID & "').datetimepicker({changeMonth: true,changeYear: true, ampm: true});"
+				End If
+			End If
+		Next
+		ScriptText &= "}" & vbCrLf
+		'handle extra height added by search bar and/or pager
+		'Dim pagebuttons As Boolean = ButtonPlaceHolder.Controls.Count > 0 OrElse PageSize > 0
+		'If EnableSearching AndAlso Not pagebuttons Then
+		'    ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 80);}catch(err){}" & vbCrLf
+		'End If
+		'If pagebuttons AndAlso Not EnableSearching Then
+		'    ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 80);}catch(err){}"
+		'End If
+		'If pagebuttons AndAlso EnableSearching Then
+		'    ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 100);}catch(err){}"
+		'End If
+		ScriptText &= "try{CorrectHeight('" & Me.ClientID & "');}catch(err){}"
+		ScriptText &= vbCrLf & "$(document).ready(function() {"
+		ScriptText &= "try{CorrectColWidth('" & Me.tbl.ClientID & "');}catch(err){}"
+		If ajaxEnable Then
+			ScriptText &= "dtiMakeGridAjax('" & Me.ClientID & "');"
+		End If
+		If Me.Width.Type = UnitType.Percentage Then
+			ScriptText &= vbCrLf &
+				" $(window).bind('resize', function() { " & vbCrLf &
+				"    try{$('#" & Me.ClientID & "_Table').setGridWidth(50," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
+				"    try{$('#" & Me.ClientID & "_Table').setGridWidth($('#" & Me.ClientID & "').width()," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
+				"}).trigger('resize'); " & vbCrLf
+			ScriptText &= vbCrLf &
+				"    try{$('#" & Me.ClientID & "_Table').setGridWidth(50," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
+				"    try{$('#" & Me.ClientID & "_Table').setGridWidth($('#" & Me.ClientID & "').width()," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}"
+		End If
+		ScriptText &= " });"
+		Return ScriptText
+	End Function
 	Private Sub setScript()
 		If Not Me.DesignMode Then
-			With Me.script
-				.ScriptText = ""
-				.ScriptText &= "var " & Me.ClientID & "_data = " & Me.Rows.ToString & vbCrLf
-				.ScriptText &= "var " & Me.ClientID & "_lastsel;"
-				.ScriptText &= "var " & Me.ID & " = $('#" & Me.tbl.ClientID & "').jqGrid({"
-				.ScriptText &= "datatype: 'local'," & vbCrLf
-				.ScriptText &= "data: " & Me.ClientID & "_data," & vbCrLf
-				.ScriptText &= "rowNum: " & rowCount & "," & vbCrLf
-				If Height.Value > 0 AndAlso Not (Height.Value = 100.0 AndAlso Height.Type = UnitType.Percentage) Then
-					.ScriptText &= "height: " & Height.Value & ","
-				Else
-					.ScriptText &= "height: 'auto',"
-				End If
-				If Width.Value > 0 Then
-					.ScriptText &= "width: " & Width.Value & ","
-				End If
-				If EnableAltRows Then
-					.ScriptText &= "altRows: true,"
-					If AltRowsCssClass <> "" Then
-						.ScriptText &= "altclass: '" & AltRowsCssClass & "',"
-					End If
-				End If
-				'.ScriptText &= "url:'local'," & vbCrLf
-				.ScriptText &= "editurl:''," & vbCrLf
-				If Not ShrinkToFit Then
-					.ScriptText &= "shrinkToFit:false," & vbCrLf
-				End If
-				'If dt IsNot Nothing Then
-				.ScriptText &= "colNames:" & Me.Columns.ColumnHeadersString
-				.ScriptText &= "colModel:" & Me.Columns.ToString
-				'End If
-				'.ScriptText &= "gridComplete: loadCompleteFunction('" & Me.tbl.ClientID & "'),"
-				'.ScriptText &= "emptyDataText:  'There are no records. If you would like to add one, click the ""Add New ..."" button below.',"
-				If EnableEditing Then
-					'.ScriptText &= "'cellEdit': true,'cellsubmit' : 'clientArray'," & vbCrLf
-					.ScriptText &= "editurl: 'clientArray'," & vbCrLf
-					'cellEdit': true,
-					'cellsubmit' : 'clientArray',
-				End If
-				.ScriptText &= "onSelectRow: function(id){" & vbCrLf
-				If EnableEditing Then
-					.ScriptText &= " dtiSelectRow('" & Me.ClientID & "',id,true);" & vbCrLf
-				End If
-
-				If AutoPostBack Then
-					.ScriptText &= "    dtiGetGridData('" & Me.ClientID & "');" & vbCrLf
-				End If
-				'.ScriptText &= "    if(id && id!==" & Me.ClientID & "_lastsel){ " & vbCrLf
-				'If EnableEditing Then
-				'    .ScriptText &= "        $('#" & Me.tbl.ClientID & "').jqGrid('editRow',id, true, " & Me.ClientID & "_datesHandle, false,'clientArray',false,function(){dtiSaveGrid('" & Me.ClientID & "');});" & vbCrLf
-				'End If
-				If Not String.IsNullOrEmpty(OnClientRowSelect) Then
-					.ScriptText &= OnClientRowSelect.Trim(";") & ";" & vbCrLf
-				End If
-				'.ScriptText &= "        " & Me.ClientID & "_lastsel=id;" & vbCrLf
-				'.ScriptText &= "    }" & vbCrLf
-				If AutoPostBack Then
-					.ScriptText &= "    $('#" & Me.btnRowSelect.ClientID & "').click();" & vbCrLf
-				End If
-				.ScriptText &= "},"
-				If EnableSorting Then
-					.ScriptText &= "onSortCol: dtiSortHandler," '{"
-				End If
-				If MultiSelect Then _
-					.ScriptText &= "multiselect: true,"
-				If Not String.IsNullOrEmpty(SortColumn) Then _
-					.ScriptText &= "sortname: """ & SortColumn & ""","
-				.ScriptText &= "sortorder: """ & SortOrder & ""","
-				If Title Is Nothing OrElse Title.ToLower = "table1" Then
-					If dt IsNot Nothing Then
-						.ScriptText &= "caption: """ & dt.TableName & """"
-					End If
-				Else
-					.ScriptText &= "caption: """ & Title & """"
-				End If
-				.ScriptText &= "});" & vbCrLf
-
-				If Me.rowCount > Me.PageSize Then
-					.ScriptText &= "var " & Me.ClientID & "_startrow = " & Me.PageSize * (PageIndex - 1) & ";" & vbCrLf
-					If Me.PageIndex = Me.PageCount Then
-						.ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
-					Else
-						.ScriptText &= "var " & Me.ClientID & "_endrow = " & (Me.PageSize * PageIndex) - 1 & ";" & vbCrLf
-					End If
-				Else
-					.ScriptText &= "var " & Me.ClientID & "_startrow = 0;" & vbCrLf
-					.ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
-				End If
-
-				'.ScriptText &= "for(var i=" & Me.ClientID & "_startrow;i<=" & Me.ClientID & "_endrow;i++){"
-				'.ScriptText &= "$('#" & Me.tbl.ClientID & "').jqGrid('addRowData',i+1," & Me.ClientID & "_data[i]);} "
-				.ScriptText &= "function " & Me.ClientID & "_datesHandle(id){ "
-				For Each column As DTIGridColumn In Me.Columns
-					If column.DataType Is GetType(DateTime) Then
-						If Not ShowDateAndTime Then
-							.ScriptText &= "$('#'+id+'_" & column.Name & "','#" & Me.tbl.ClientID & "').datepicker({changeMonth: true,changeYear: true});"
-						Else
-							.ScriptText &= "$('#'+id+'_" & column.Name & "','#" & Me.tbl.ClientID & "').datetimepicker({changeMonth: true,changeYear: true, ampm: true});"
-						End If
-					End If
-				Next
-				.ScriptText &= "}" & vbCrLf
-				'handle extra height added by search bar and/or pager
-				'Dim pagebuttons As Boolean = ButtonPlaceHolder.Controls.Count > 0 OrElse PageSize > 0
-				'If EnableSearching AndAlso Not pagebuttons Then
-				'    .ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 80);}catch(err){}" & vbCrLf
-				'End If
-				'If pagebuttons AndAlso Not EnableSearching Then
-				'    .ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 80);}catch(err){}"
-				'End If
-				'If pagebuttons AndAlso EnableSearching Then
-				'    .ScriptText &= "try{$('#" & Me.ClientID & "').height($('#" & Me.ClientID & "').height() + 100);}catch(err){}"
-				'End If
-				.ScriptText &= "try{CorrectHeight('" & Me.ClientID & "');}catch(err){}"
-				.ScriptText &= vbCrLf & "$(document).ready(function() {"
-				.ScriptText &= "try{CorrectColWidth('" & Me.tbl.ClientID & "');}catch(err){}"
-				If ajaxEnable Then
-					.ScriptText &= "dtiMakeGridAjax('" & Me.ClientID & "');"
-				End If
-				If Me.Width.Type = UnitType.Percentage Then
-					.ScriptText &= vbCrLf &
-					" $(window).bind('resize', function() { " & vbCrLf &
-					"    try{$('#" & Me.ClientID & "_Table').setGridWidth(50," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
-					"    try{$('#" & Me.ClientID & "_Table').setGridWidth($('#" & Me.ClientID & "').width()," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
-					"}).trigger('resize'); " & vbCrLf
-					.ScriptText &= vbCrLf &
-					"    try{$('#" & Me.ClientID & "_Table').setGridWidth(50," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}" & vbCrLf &
-					"    try{$('#" & Me.ClientID & "_Table').setGridWidth($('#" & Me.ClientID & "').width()," & Me.ShrinkToFit.ToString.ToLower & "); }catch(e){}"
-				End If
-				.ScriptText &= " });"
-
-			End With
+			script.Text = "<script type=""text/javascript"" language=""javascript"">(function($) {" & getScript() & "})($$);</script>"
+			'jQueryLibrary.jQueryInclude.addScriptBlock(Me.Page, getScript())
 		End If
 
 	End Sub
@@ -1539,8 +1556,8 @@ Public Class DTIGrid
 		"Columns: " & Me.Columns.ToString & vbCrLf &
 		"Rows: " & Me.Rows.ToString & vbCrLf &
 		 "" & vbCrLf &
-		 "Script: " & vbCrLf &
-		Me.script.ScriptText
+		"Script: " & vbCrLf &
+		Me.getScript()
 	End Function
 
 	''' <summary>
