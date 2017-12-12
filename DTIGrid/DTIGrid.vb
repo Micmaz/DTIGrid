@@ -1128,8 +1128,9 @@ Public Class DTIGrid
 			Dim allCols As String = ""
 
 			For Each col As DTIGridColumn In Me.Columns
-				If col.Visible AndAlso col.DataType.ToString().Substring(7).StartsWith("String") Then _
+				If col.Visible Then  'AndAlso col.DataType.ToString().Substring(7).StartsWith("String")  Searches only string cols
 					allCols &= col.ColumnHeader & ","
+				End If
 			Next
 			allCols = allCols.Trim(",")
 			ddlSearch.Items.Add(New ListItem("", allCols))
