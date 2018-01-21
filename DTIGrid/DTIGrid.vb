@@ -1406,9 +1406,9 @@ Public Class DTIGrid
 	Private Function getScript() As String
 		Dim ScriptText As String = ""
 		ScriptText = ""
-		ScriptText &= "var " & Me.ClientID & "_data = " & Me.Rows.ToString & vbCrLf
-		ScriptText &= "var " & Me.ClientID & "_lastsel;"
-		ScriptText &= "var " & Me.ID & " = $('#" & Me.tbl.ClientID & "').jqGrid({"
+		ScriptText &= "window." & Me.ClientID & "_data = " & Me.Rows.ToString & vbCrLf
+		ScriptText &= "window." & Me.ClientID & "_lastsel = null;"
+		ScriptText &= "window." & Me.ID & " = $('#" & Me.tbl.ClientID & "').jqGrid({"
 		ScriptText &= "datatype: 'local'," & vbCrLf
 		ScriptText &= "data: " & Me.ClientID & "_data," & vbCrLf
 		ScriptText &= "rowNum: " & rowCount & "," & vbCrLf
@@ -1482,15 +1482,15 @@ Public Class DTIGrid
 		ScriptText &= "});" & vbCrLf
 
 		If Me.rowCount > Me.PageSize Then
-			ScriptText &= "var " & Me.ClientID & "_startrow = " & Me.PageSize * (PageIndex - 1) & ";" & vbCrLf
+			ScriptText &= "window." & Me.ClientID & "_startrow = " & Me.PageSize * (PageIndex - 1) & ";" & vbCrLf
 			If Me.PageIndex = Me.PageCount Then
-				ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
+				ScriptText &= "window." & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
 			Else
-				ScriptText &= "var " & Me.ClientID & "_endrow = " & (Me.PageSize * PageIndex) - 1 & ";" & vbCrLf
+				ScriptText &= "window." & Me.ClientID & "_endrow = " & (Me.PageSize * PageIndex) - 1 & ";" & vbCrLf
 			End If
 		Else
-			ScriptText &= "var " & Me.ClientID & "_startrow = 0;" & vbCrLf
-			ScriptText &= "var " & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
+			ScriptText &= "window." & Me.ClientID & "_startrow = 0;" & vbCrLf
+			ScriptText &= "window." & Me.ClientID & "_endrow = " & Me.ClientID & "_data.length;" & vbCrLf
 		End If
 
 		'ScriptText &= "for(var i=" & Me.ClientID & "_startrow;i<=" & Me.ClientID & "_endrow;i++){"
@@ -1538,8 +1538,8 @@ Public Class DTIGrid
 	End Function
 	Private Sub setScript()
 		If Not Me.DesignMode Then
-			script.Text = "<script type=""text/javascript"" language=""javascript"">(function($) {" & getScript() & "})($$);</script>"
-			'jQueryLibrary.jQueryInclude.addScriptBlock(Me.Page, getScript())
+			script.Text = jQueryLibrary.jQueryInclude.isolateJquery(getScript(), True) '"<script type=""text/javascript"" language=""javascript"">(function($) {" & getScript() & "})($$);</script>"
+			'jQueryLibrary.jQueryInclude.addScriptBlock(Me.Page, getScript(), id:=Me.ID)
 		End If
 
 	End Sub

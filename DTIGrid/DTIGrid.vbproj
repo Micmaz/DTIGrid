@@ -37,7 +37,7 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>..\..\DTIControls\_Output\</OutputPath>
+    <OutputPath>..\..\_Output\</OutputPath>
     <DocumentationFile>DTIGrid.xml</DocumentationFile>
     <NoWarn>42353,42354,42355</NoWarn>
   </PropertyGroup>
