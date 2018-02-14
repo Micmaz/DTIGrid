@@ -3,7 +3,7 @@ var dataLength = 0;
 	var dtiGridDelRow = function(table){
     var tblId='#'+table+'_Table';
     var hfId ='#'+table+'_DeletedRowsHidden';
-    var lastSel = eval(table+"_lastsel");
+	var lastSel = eval("window." + table+"_lastsel");
     $(tblId).jqGrid("saveRow", lastSel,false,'clientArray');
     if ($(tblId).getGridParam('multiselect')) {
         gridConfrim(tblId, hfId, lastSel, true);
@@ -115,9 +115,9 @@ function dtiSaveRow1(table, rowid) {
 
 	var dtiSelectRow = function(table, id, editEnabled) {
 		var tblId = '#' + table + '_Table';
-		var lastSel = eval(table + "_lastsel");
+		var lastSel = eval("window." + table + "_lastsel");
 		if (id && id !== lastSel) {
-			eval(table + "_lastsel=" + id);
+			eval("window." + table + "_lastsel='" + id +"'");
 			if (lastSel) {
 				$(tblId).saveRow(lastSel);
 

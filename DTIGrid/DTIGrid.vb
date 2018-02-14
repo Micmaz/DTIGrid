@@ -191,10 +191,10 @@ Public Class DTIGrid
             End If
             If Page Is Nothing Then Return Nothing
             If DataSource Is Nothing AndAlso Page.IsPostBack Then
-                If _returnSavedDt Then
-                    Return SavedGrid.DataSource
-                End If
-            End If
+				If _returnSavedDt AndAlso SavedGrid IsNot Nothing Then
+					Return SavedGrid.DataSource
+				End If
+			End If
             Return DataSource
         End Get
     End Property
@@ -1445,11 +1445,11 @@ Public Class DTIGrid
 		End If
 		ScriptText &= "onSelectRow: function(id){" & vbCrLf
 		If EnableEditing Then
-			ScriptText &= " dtiSelectRow('" & Me.ClientID & "',id,true);" & vbCrLf
+			ScriptText &= " DataGrid.dtiSelectRow('" & Me.ClientID & "',id,true);" & vbCrLf
 		End If
 
 		If AutoPostBack Then
-			ScriptText &= "    dtiGetGridData('" & Me.ClientID & "');" & vbCrLf
+			ScriptText &= "    DataGrid.dtiGetGridData('" & Me.ClientID & "');" & vbCrLf
 		End If
 		'.ScriptText &= "    if(id && id!==" & Me.ClientID & "_lastsel){ " & vbCrLf
 		'If EnableEditing Then
@@ -1465,7 +1465,7 @@ Public Class DTIGrid
 		End If
 		ScriptText &= "},"
 		If EnableSorting Then
-			ScriptText &= "onSortCol: dtiSortHandler," '{"
+			ScriptText &= "onSortCol: DataGrid.dtiSortHandler," '{"
 		End If
 		If MultiSelect Then _
 			ScriptText &= "multiselect: true,"
@@ -1495,7 +1495,7 @@ Public Class DTIGrid
 
 		'ScriptText &= "for(var i=" & Me.ClientID & "_startrow;i<=" & Me.ClientID & "_endrow;i++){"
 		'ScriptText &= "$('#" & Me.tbl.ClientID & "').jqGrid('addRowData',i+1," & Me.ClientID & "_data[i]);} "
-		ScriptText &= "function " & Me.ClientID & "_datesHandle(id){ "
+		ScriptText &= "window." & Me.ClientID & "_datesHandle = function(id){ "
 		For Each column As DTIGridColumn In Me.Columns
 			If column.DataType Is GetType(DateTime) Then
 				If Not ShowDateAndTime Then

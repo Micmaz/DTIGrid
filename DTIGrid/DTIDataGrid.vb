@@ -517,21 +517,34 @@ Public Class DTIDataGrid
                     Dim dtmp As New DataTable
                     sqlhelper.Adaptor(tblname).FillSchema(dtmp, SchemaType.Mapped)
 
-                    If dtmp.PrimaryKey.Length > 0 Then
-                        Return dtmp.PrimaryKey(0).ToString
-                    End If
-                    If dtmp.Columns.Contains("id") Then Return "id"
-                Else
+					If dtmp.PrimaryKey.Length > 0 Then
+						Return dtmp.PrimaryKey(0).ToString
+					End If
+					'If no primary key is found on the table, look for popular column names
+					tblname = dtmp.TableName
+					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+					If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
+					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+				Else
 
                     Dim dtmp As New DataTable
                     sqlhelper.Adaptor(DataTableName).FillSchema(dtmp, SchemaType.Mapped)
 
-                    If dtmp.PrimaryKey.Length > 0 Then
-                        Return dtmp.PrimaryKey(0).ToString
-                    End If
-                    If dtmp.Columns.Contains("id") Then Return "id"
-                End If
-            End If
+					If dtmp.PrimaryKey.Length > 0 Then
+						Return dtmp.PrimaryKey(0).ToString
+					End If
+					'If no primary key is found on the table, look for popular column names
+					If dtmp.Columns.Contains("id") Then Return "id"
+					Dim tblname As String = dtmp.TableName
+					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+					If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
+					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+				End If
+				End If
             Return ""
         End Get
     End Property

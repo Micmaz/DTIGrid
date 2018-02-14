@@ -141,9 +141,9 @@ Public Class DTIGridRow
                             strbldr.Append(BaseClasses.BaseSecurityPage.RemoveSpecialCharacters(Me.Keys(i), "_") & ":""" & BaseClasses.BaseSecurityPage.JavaScriptEncode(Me.Items(i).ToString) & """,")
                     End Select
                 End If
-                'End If
+				'End If
 
-            Next
+			Next
         End If
         If strbldr.Length > 1 Then _
             strbldr.Remove(strbldr.Length - 1, 1)
