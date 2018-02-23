@@ -162,6 +162,7 @@ Public Class DTIGrid
     Private WithEvents btnPrev As New Button
     Private WithEvents btnFirst As New Button
     Private WithEvents btnLast As New Button
+    Private WithEvents btnExcel As New ImageButton
     Private WithEvents tbPageNum As New TextBox
     Private lblSeperator As New Literal
     Private lblPages As New Literal
@@ -249,6 +250,15 @@ Public Class DTIGrid
             If cancelParse Then Return Nothing
             Return Page.Request.Form(postbackData.UniqueID) 'postbackData.Value
         End Get
+    End Property
+
+    Public Property ExcelExport() As Boolean
+        Get
+            Return btnExcel.Visible
+        End Get
+        Set(value As Boolean)
+            btnExcel.Visible = value
+        End Set
     End Property
 #End Region
 
@@ -591,6 +601,12 @@ Public Class DTIGrid
 		End Set
 	End Property
 
+	''' <summary>
+	''' Gets or sets a value indicating whether Paging is enabled.
+	''' </summary>
+	''' <value>
+	'''   <c>true</c> if [enable paging]; otherwise, <c>false</c>.
+	''' </value>
 	Public Property EnablePaging() As Boolean
 		Get
 			Return _enablePaging
@@ -830,15 +846,22 @@ Public Class DTIGrid
 	End Property
 	Private shinkToFixExtrnallyChanged As Boolean = False
 
-	Private _renderastable As Boolean = False
-	Public Property renderAsTable() As Boolean
-		Get
-			Return _renderastable
-		End Get
-		Set(ByVal value As Boolean)
-			_renderastable = value
-		End Set
-	End Property
+	''' <summary>
+	''' If true the control is rendered as an html table. Click event, sorting eding etc will not function (hey! it's a table!) Paging and searching still work fine.
+	''' </summary>
+	''' <value>
+	'''   <c>true</c> if [render as table]; otherwise, <c>false</c>.
+	''' </value>
+	Public Property renderAsTable() As Boolean = False
+
+	''' <summary>
+	''' If false grid cells will display html content as regular html. Set to true to see the "source view" for html cells.
+	''' </summary>
+	''' <value>
+	'''   <c>true</c> if autoencode; otherwise, <c>false</c>.
+	''' </value>
+	Public Property autoencode() As Boolean = False
+
 
 #End Region
 
@@ -850,8 +873,8 @@ Public Class DTIGrid
 		_deletedRows = New DTIGridRowCollection(Me)
 		_addedRows = New DTIGridRowCollection(Me)
 
-
-		sPostbackData.EnableViewState = False
+        btnExcel.Visible = False
+        sPostbackData.EnableViewState = False
 		postbackData.EnableViewState = False
 		hfSelectedRows.EnableViewState = False
 		hfDeletedRows.EnableViewState = False
@@ -891,8 +914,9 @@ Public Class DTIGrid
 		Me.Controls.Add(hfPageCommand)
 		Me.Controls.Add(script)
 		Me.Controls.Add(btnRowSelect)
-		Me.Controls.Add(btnSort)
-		Me.CssClass = "DTIGrid"
+        Me.Controls.Add(btnSort)
+        Me.Controls.Add(btnExcel)
+        Me.CssClass = "DTIGrid"
 	End Sub
 
 	Protected Overridable Sub changeInnerControlIds()
@@ -1426,6 +1450,9 @@ Public Class DTIGrid
 				ScriptText &= "altclass: '" & AltRowsCssClass & "',"
 			End If
 		End If
+
+		ScriptText &= "autoencode: " & autoencode.ToString().ToLower() & ","
+
 		'.ScriptText &= "url:'local'," & vbCrLf
 		ScriptText &= "editurl:''," & vbCrLf
 		If Not ShrinkToFit Then
@@ -1812,4 +1839,11 @@ Public Class DTIGrid
         cancelParse = True
     End Sub
 
+    Private Sub btnExcel_Click(sender As Object, e As ImageClickEventArgs) Handles btnExcel.Click
+        ExporttoExcel()
+
+    End Sub
+    Public Overridable Sub ExporttoExcel(Optional colnames As String() = Nothing, Optional filename As String = Nothing)
+        BaseClasses.BaseSecurityPage.excelExport(dt, colnames, True, filename)
+    End Sub
 End Class

@@ -1,2 +1,0 @@
-add datepicker to form edit*
-	*issues with z-index
