@@ -1153,7 +1153,7 @@ Public Class DTIGrid
 
 			For Each col As DTIGridColumn In Me.Columns
 				If col.Visible Then  'AndAlso col.DataType.ToString().Substring(7).StartsWith("String")  Searches only string cols
-					allCols &= col.ColumnHeader & ","
+					allCols &= col.Name & ","
 				End If
 			Next
 			allCols = allCols.Trim(",")
