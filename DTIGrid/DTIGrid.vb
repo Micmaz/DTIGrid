@@ -607,6 +607,7 @@ Public Class DTIGrid
 	''' <value>
 	'''   <c>true</c> if [enable paging]; otherwise, <c>false</c>.
 	''' </value>
+<System.ComponentModel.Description("Gets or sets a value indicating whether Paging is enabled.")> _
 	Public Property EnablePaging() As Boolean
 		Get
 			Return _enablePaging
@@ -852,6 +853,7 @@ Public Class DTIGrid
 	''' <value>
 	'''   <c>true</c> if [render as table]; otherwise, <c>false</c>.
 	''' </value>
+<System.ComponentModel.Description("If true the control is rendered as an html table. Click event, sorting eding etc will not function (hey! it's a table!) Paging and searching still work fine.")> _
 	Public Property renderAsTable() As Boolean = False
 
 	''' <summary>
@@ -860,6 +862,7 @@ Public Class DTIGrid
 	''' <value>
 	'''   <c>true</c> if autoencode; otherwise, <c>false</c>.
 	''' </value>
+<System.ComponentModel.Description("If false grid cells will display html content as regular html. Set to true to see the ""source view"" for html cells.")> _
 	Public Property autoencode() As Boolean = False
 
 

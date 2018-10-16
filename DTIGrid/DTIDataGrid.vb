@@ -390,17 +390,26 @@ Public Class DTIDataGrid
     Private Sub FillTablePasser(ByVal sql As String, ByVal dt As DataTable, ByVal ParamArray parms() As Object)
         Dim l As New ArrayList       
         l.Add(dt)
-        Try
-            For Each itm As Object In DataTableParamArray
-                l.Add(itm)
-            Next
-        Catch ex As Exception
+		Try
+			For Each itm As Object In DataTableParamArray
+				l.Add(itm)
+			Next
+		Catch ex As Exception
 
-        End Try
-        Array.Resize(parms, l.Count)
+		End Try
+		Dim query As String = ""
+		If Not String.IsNullOrEmpty(searchString) Then
+			If sql.ToLower().Contains("where") Then
+				query = " AND " & searchString
+			Else
+				query = " where " & searchString
+			End If
+
+		End If
+		Array.Resize(parms, l.Count)
         l.ToArray.CopyTo(parms, 0)
-        GridHelper.FillDataTable(sql, parms)
-    End Sub
+		GridHelper.FillDataTable(sql & query, parms)
+	End Sub
 
     Private firstFetched As Boolean = True
 	Public Function fetchdata(Optional ByVal allowRefetch As Boolean = True) As Boolean
@@ -447,8 +456,13 @@ Public Class DTIDataGrid
 							If isSelect(_dataTableName) Then
 								FillTablePasser(originalTableName, dt)
 								Me.PageSize = dt.Rows.Count
+
 							Else
-								GridHelper.FillDataTable("Select top 100 * from " & _dataTableName, dt, DataTableParamArray.ToArray())
+								Dim query As String = ""
+								If Not String.IsNullOrEmpty(searchString) Then
+									query = " where " & searchString
+								End If
+								GridHelper.FillDataTable("Select top 100 * from " & _dataTableName & query, dt, DataTableParamArray.ToArray())
 								If PageSize = 100 Then
 									dataError(New Exception("Only the first 100 rows from the table are displayed."))
 								End If

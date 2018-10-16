@@ -3,7 +3,8 @@
 
 Usage: 
 (Editing a table called "Locations". The project connection string is used if it is named "ConnectionString")
-
+```HTML
     <%@ Register Assembly="DTIGrid" Namespace="DTIGrid" TagPrefix="DTIGrid" %>
     <DTIGrid:DTIDataGrid ID="DTIDataGrid1" runat="server" DataTableName="Locations" EnableEditing="True"
     Width="100%" EnablePaging="True" EnableSorting="True" EnableSearching="True" />
+```
