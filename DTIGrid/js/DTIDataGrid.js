@@ -414,12 +414,13 @@ function dtiSaveRow1(table, rowid) {
 	window.JqgridIntElem = JqgridIntElem;
 	window.JqgridDubElem = JqgridDubElem;
 	window.jqGridIntValue = jqGridIntValue;
-
+    window.dtiGetGridData = dtiGetGridData;
 
 
 return {
 	dataLength: dataLength,
-	dtiGridDelRow: dtiGridDelRow,
+    dtiGridDelRow: dtiGridDelRow,
+    dtiGetGridData: dtiGetGridData,  
 	deleteRow: deleteRow,
 	deleteRows: deleteRows,
 	gridConfrim: gridConfrim,
