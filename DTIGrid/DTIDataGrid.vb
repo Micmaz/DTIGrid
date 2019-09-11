@@ -277,6 +277,7 @@ Public Class DTIDataGrid
         Get
             If DesignMode Then Return False
             If Me.hfPageCommand.Value = "save" Then Return True
+            If btnSave.UniqueID Is Nothing Then Return False
             Return Page.Request.Params(btnSave.UniqueID) IsNot Nothing
         End Get
     End Property
@@ -351,6 +352,7 @@ Public Class DTIDataGrid
     End Sub
 
     Protected Function isSelect(ByVal cmd As String) As Boolean
+        If cmd Is Nothing Then Return False
         Dim r0 As Regex = New Regex("select", RegexOptions.IgnoreCase Or RegexOptions.Multiline Or RegexOptions.CultureInvariant Or RegexOptions.Compiled)
         Return r0.IsMatch(cmd)
     End Function
@@ -544,9 +546,16 @@ Public Class DTIDataGrid
 				Else
 
                     Dim dtmp As New DataTable
-                    sqlhelper.Adaptor(DataTableName).FillSchema(dtmp, SchemaType.Mapped)
+                    'Fix if the table is in another DB
+                    Try
+                        sqlhelper.Adaptor(DataTableName).FillSchema(dtmp, SchemaType.Mapped)
+                    Catch ex As Exception
+                        sqlhelper.FillDataTable("select top 1 * from " & DataTableName, dtmp)
+                        'If EnableAdding OrElse EnableDeleting OrElse EnableEditing Then _
+                        'Throw New Exception("could not get the schema for table: " & DataTableName & ". Editing will be disabled.", ex)
+                    End Try
 
-					If dtmp.PrimaryKey.Length > 0 Then
+                    If dtmp.PrimaryKey.Length > 0 Then
 						Return dtmp.PrimaryKey(0).ToString
 					End If
 					'If no primary key is found on the table, look for popular column names

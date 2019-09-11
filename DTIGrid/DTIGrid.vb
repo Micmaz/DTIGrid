@@ -717,15 +717,19 @@ Public Class DTIGrid
 	''' <remarks></remarks>
 	<System.ComponentModel.Description("Determines if page was changed within the DTIGrid")>
 	Public ReadOnly Property isPageChangeClicked() As Boolean
-		Get
-			If DesignMode Then Return Nothing
-			Return Page.Request.Params(btnNext.UniqueID) IsNot Nothing OrElse
-				Page.Request.Params(btnPrev.UniqueID) IsNot Nothing OrElse
-				Page.Request.Params(btnFirst.UniqueID) IsNot Nothing OrElse
-				Page.Request.Params(btnLast.UniqueID) IsNot Nothing OrElse
-				Page.Request.Params("__EVENTTARGET") = tbPageNum.UniqueID
-		End Get
-	End Property
+        Get
+            If DesignMode Then Return False
+            Try
+                Return Page.Request.Params(btnNext.UniqueID) IsNot Nothing OrElse
+                Page.Request.Params(btnPrev.UniqueID) IsNot Nothing OrElse
+                Page.Request.Params(btnFirst.UniqueID) IsNot Nothing OrElse
+                Page.Request.Params(btnLast.UniqueID) IsNot Nothing OrElse
+                Page.Request.Params("__EVENTTARGET") = tbPageNum.UniqueID
+            Catch ex As Exception
+                Return False
+            End Try
+        End Get
+    End Property
 
 	''' <summary>
 	''' Determines if a built in search was clicked within the DTIGrid
@@ -736,8 +740,9 @@ Public Class DTIGrid
 	<System.ComponentModel.Description("Determines if a built in search was clicked within the DTIGrid")>
 	Public ReadOnly Property isSearchClicked() As Boolean
 		Get
-			If DesignMode Then Return False
-			Return Page.Request.Params(btnSearch.UniqueID) IsNot Nothing
+            If DesignMode Then Return False
+            If btnSearch.UniqueID Is Nothing Then Return False
+            Return Page.Request.Params(btnSearch.UniqueID) IsNot Nothing
 		End Get
 	End Property
 
@@ -750,8 +755,9 @@ Public Class DTIGrid
 	<System.ComponentModel.Description("Determines if a sort was made on the DTIGrid")>
 	Public ReadOnly Property isSortClicked() As Boolean
 		Get
-			If DesignMode Then Return False
-			Return Page.Request.Params(btnSort.UniqueID) IsNot Nothing
+            If DesignMode Then Return False
+            If btnSort.UniqueID Is Nothing Then Return False
+            Return Page.Request.Params(btnSort.UniqueID) IsNot Nothing
 		End Get
 	End Property
 
@@ -764,8 +770,9 @@ Public Class DTIGrid
 	<System.ComponentModel.Description("Determines if DTIGrid is performing an AutoPostBack")>
 	Public ReadOnly Property isGridClick() As Boolean
 		Get
-			If DesignMode Then Return False
-			Return Page.Request.Params(btnRowSelect.UniqueID) IsNot Nothing
+            If DesignMode Then Return False
+            If btnRowSelect.UniqueID Is Nothing Then Return False
+            Return Page.Request.Params(btnRowSelect.UniqueID) IsNot Nothing
 		End Get
 	End Property
 
