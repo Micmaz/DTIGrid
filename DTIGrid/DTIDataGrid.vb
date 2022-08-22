@@ -5,11 +5,11 @@ Public Class DTIDataGrid
     Inherits DTIGrid
 
 #Region "Private Variables"
-    Private btnAdd As New ClientButton
-    Private btnDel As New ClientButton
-    Private btnCancel As New ClientButton
-    Private WithEvents btnSave As New Button
-    'Private pk As String = ""
+    Protected btnAdd As New ClientButton
+    Protected btnDel As New ClientButton
+    Protected btnCancel As New ClientButton
+    Protected WithEvents btnSave As New Button
+    'Protected pk As String = ""
 #End Region
 
 #Region "Private Properties"
@@ -320,7 +320,7 @@ Public Class DTIDataGrid
         ButtonPlaceHolder.Controls.Add(btnCancel)
     End Sub
 
-    Private Sub DTIDataGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+    Protected Sub DTIDataGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
         changeInnerControlIds()
         changeInnerControlIds2()
         'If Not Me.DataTableName = "" Then
@@ -518,7 +518,7 @@ Public Class DTIDataGrid
 		Return retval
 	End Function
 
-	Private ReadOnly Property pk() As String
+    Protected ReadOnly Property pk() As String
         Get
             If DataTableKey <> "" Then
                 Return DataTableKey
@@ -533,17 +533,17 @@ Public Class DTIDataGrid
                     Dim dtmp As New DataTable
                     sqlhelper.Adaptor(tblname).FillSchema(dtmp, SchemaType.Mapped)
 
-					If dtmp.PrimaryKey.Length > 0 Then
-						Return dtmp.PrimaryKey(0).ToString
-					End If
-					'If no primary key is found on the table, look for popular column names
-					tblname = dtmp.TableName
-					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
-					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
-					If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
-					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
-					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
-				Else
+                    If dtmp.PrimaryKey.Length > 0 Then
+                        Return dtmp.PrimaryKey(0).ToString
+                    End If
+                    'If no primary key is found on the table, look for popular column names
+                    tblname = dtmp.TableName
+                    If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+                    If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+                    If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
+                    If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+                    If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+                Else
 
                     Dim dtmp As New DataTable
                     'Fix if the table is in another DB
@@ -556,18 +556,18 @@ Public Class DTIDataGrid
                     End Try
 
                     If dtmp.PrimaryKey.Length > 0 Then
-						Return dtmp.PrimaryKey(0).ToString
-					End If
-					'If no primary key is found on the table, look for popular column names
-					If dtmp.Columns.Contains("id") Then Return "id"
-					Dim tblname As String = dtmp.TableName
-					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
-					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
-					If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
-					If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
-					If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
-				End If
-				End If
+                        Return dtmp.PrimaryKey(0).ToString
+                    End If
+                    'If no primary key is found on the table, look for popular column names
+                    If dtmp.Columns.Contains("id") Then Return "id"
+                    Dim tblname As String = dtmp.TableName
+                    If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+                    If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+                    If (tblname.ToLower.EndsWith("s")) Then tblname = tblname.TrimEnd("s")
+                    If dtmp.Columns.Contains(tblname + "id") Then Return tblname + "id"
+                    If dtmp.Columns.Contains(tblname + "_id") Then Return tblname + "_id"
+                End If
+            End If
             Return ""
         End Get
     End Property

@@ -180,7 +180,7 @@ Public Class DTIGrid
 #Region "Private Properties"
 
     Protected _returnSavedDt As Boolean = False
-    Friend ReadOnly Property dt() As DataTable
+    Public ReadOnly Property dt() As DataTable
         Get
             If DataSource IsNot Nothing AndAlso Not TypeOf DataSource Is DataTable Then
                 If TypeOf DataSource Is DataView Then
@@ -192,10 +192,10 @@ Public Class DTIGrid
             End If
             If Page Is Nothing Then Return Nothing
             If DataSource Is Nothing AndAlso Page.IsPostBack Then
-				If _returnSavedDt AndAlso SavedGrid IsNot Nothing Then
-					Return SavedGrid.DataSource
-				End If
-			End If
+                If _returnSavedDt AndAlso SavedGrid IsNot Nothing Then
+                    Return SavedGrid.DataSource
+                End If
+            End If
             Return DataSource
         End Get
     End Property
@@ -225,7 +225,7 @@ Public Class DTIGrid
         End Set
     End Property
 
-    Friend ReadOnly Property SortString() As String
+    Protected ReadOnly Property SortString() As String
         Get
             If SortColumn.Trim = "" Then Return ""
             Return (SortColumn & " " & SortOrder).Trim
@@ -1019,25 +1019,25 @@ Public Class DTIGrid
 		End If
 	End Sub
 
-	Private Sub DTIGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
-		'jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
-		jQueryLibrary.jQueryInclude.RegisterJQueryUI(Page)
-		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-3.8.2.min.js", , True)
-		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.1.2.min.js", , True)
-		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.5.2.min.js", , True)
-		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqgrid.min.js", , True)
-		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.4.3.min.js", , True)
-		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/DTIDataGrid.js", , True)
-		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/ui.jqgrid.css", "text/css", True)
-		If ShowDateAndTime Then
-			jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.timepicker.js", , True)
-			jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jqueryTimepicker.css", "text/css", True)
-		End If
-		changeInnerControlIds()
-	End Sub
+    Protected Overridable Sub DTIGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+        'jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
+        jQueryLibrary.jQueryInclude.RegisterJQueryUI(Page)
+        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-3.8.2.min.js", , True)
+        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.1.2.min.js", , True)
+        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.5.2.min.js", , True)
+        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqgrid.min.js", , True)
+        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.4.3.min.js", , True)
+        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/DTIDataGrid.js", , True)
+        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/ui.jqgrid.css", "text/css", True)
+        If ShowDateAndTime Then
+            jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.timepicker.js", , True)
+            jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jqueryTimepicker.css", "text/css", True)
+        End If
+        changeInnerControlIds()
+    End Sub
 
 #Region "button clicks"
-	Private Sub btnSort_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSort.Click
+    Private Sub btnSort_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSort.Click
 		Dim btnClientID As String = CType(sender, Button).ClientID
 		If btnClientID.IndexOf(Me.ClientID) > -1 Then
 			Dim sorStr As String = sPostbackData.Value 'Me.Page.Request.Form(sPostbackData.ClientID)
@@ -1769,7 +1769,7 @@ Public Class DTIGrid
                         Dim edittype As Type = gRow(columnName).GetType
                         If gCol.EditType = DTIGridColumn.EditTypes.select Then
                             columnVal = gCol.SelectStringToValue(columnVal)
-                            edittype = columnVal.GetType
+                            'edittype = columnVal.GetType
                         End If
                         If edittype Is GetType(DateTime) Then
                             If gRow(columnName) IsNot DBNull.Value AndAlso columnVal = "" Then

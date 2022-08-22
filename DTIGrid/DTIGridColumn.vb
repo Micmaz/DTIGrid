@@ -265,8 +265,9 @@ Public Class DTIGridColumn
     ''' <param name="value"></param>
     ''' <param name="DisplayString"></param>
     ''' <remarks></remarks>
-    <System.ComponentModel.Description("Sets the column to a select list type and adds an item to that list.")> _
+    <System.ComponentModel.Description("Sets the column to a select list type and adds an item to that list.")>
     Public Sub addItemToSelectList(ByVal value As Object, Optional ByVal DisplayString As String = Nothing)
+        If value Is Nothing Then value = DBNull.Value
         Me.EditType = EditTypes.select
         If Me.SelectTableTextColumn Is Nothing Then
             SelectTableTextColumn = "display"
@@ -283,7 +284,7 @@ Public Class DTIGridColumn
         If Not SelectTable.Columns.Contains(SelectTableValueColumn) Then
             SelectTable.Columns.Add(SelectTableValueColumn)
         End If
-        If DisplayString Is Nothing Then DisplayString = value
+        If DisplayString Is Nothing Then DisplayString = value.ToString()
         Dim row As DataRow = SelectTable.NewRow
         row(SelectTableValueColumn) = value
         row(SelectTableTextColumn) = DisplayString
@@ -308,10 +309,11 @@ Public Class DTIGridColumn
     ''' <param name="valueColumn"></param>
     ''' <param name="textColumn"></param>
     ''' <remarks></remarks>
-    <System.ComponentModel.Description("Sets the column to a select list type and sets a datatable as the select item list.")> _
-    Public Sub setSelectTable(ByVal table As DataTable, Optional ByVal valueColumn As String = Nothing, Optional ByVal textColumn As String = Nothing)
+    <System.ComponentModel.Description("Sets the column to a select list type and sets a datatable as the select item list.")>
+    Public Sub setSelectTable(ByVal table As DataTable, Optional ByVal valueColumn As String = Nothing, Optional ByVal textColumn As String = Nothing, Optional NullHeader As String = Nothing)
         Me.EditType = EditTypes.select
         SelectTable = table
+
         If valueColumn Is Nothing Then
             valueColumn = table.Columns(0).ColumnName
         End If
@@ -319,6 +321,13 @@ Public Class DTIGridColumn
         If Not textColumn Is Nothing Then
             SelectTableTextColumn = textColumn
         End If
+        If NullHeader IsNot Nothing Then
+            Dim newRow As DataRow = SelectTable.NewRow()
+            newRow(valueColumn) = DBNull.Value
+            If textColumn IsNot Nothing Then newRow(textColumn) = NullHeader
+            SelectTable.Rows.InsertAt(newRow, 0)
+        End If
+
     End Sub
 
 #End Region
