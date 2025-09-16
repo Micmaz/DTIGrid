@@ -334,7 +334,7 @@ Public Class DTIDataGrid
         End If
     End Sub
 
-    Public Overrides Sub databind()
+    Public Overrides Sub DataBind()
         'fix paging errors
         If PageSize <= 0 Then
             PageSize = 15
@@ -675,7 +675,7 @@ Public Class DTIDataGrid
         End If
     End Sub
 
-    Private Sub DTIDataGrid_RowDeleted(ByRef row As DTIGridRow) Handles MyBase.RowDeleted
+    Private Sub DTIDataGrid_RowDeleted(row As DTIGridRow) Handles MyBase.RowDeleted
         If EnableEditing AndAlso EnableDeleting Then
             RaiseEvent BeforeRowDeleted(row)
             If row.RowState = DTIGridRow.DTIRowState.Deleted Then
@@ -695,7 +695,7 @@ Public Class DTIDataGrid
         End If
     End Sub
 
-    Private Sub DTIDataGrid_RowUpdated(ByRef row As DTIGridRow) Handles MyBase.RowUpdated
+    Private Sub DTIDataGrid_RowUpdated(row As DTIGridRow) Handles MyBase.RowUpdated
         If EnableEditing Then
             RaiseEvent BeforeRowUpdated(row)
             If row.RowState = DTIGridRow.DTIRowState.Updated Then
@@ -724,7 +724,7 @@ Public Class DTIDataGrid
         End If
     End Sub
 
-    Private Sub DTIDataGrid_RowAdded(ByRef row As DTIGridRow) Handles MyBase.RowAdded
+    Private Sub DTIDataGrid_RowAdded(row As DTIGridRow) Handles MyBase.RowAdded
         If EnableEditing AndAlso EnableAdding Then
             RaiseEvent BeforeRowAdded(row)
             If row.RowState = DTIGridRow.DTIRowState.Added Then
@@ -823,7 +823,7 @@ Public Class DTIDataGrid
 
     End Sub
 
-    Private Sub doSaveMethods()
+    Public Sub doSaveMethods()
         RaiseEvent BeforeSaveClicked(dt)
         Try
             If dt.PrimaryKey.Length = 0 AndAlso GridHelper.createAdaptorsWithoutPrimaryKeys Then

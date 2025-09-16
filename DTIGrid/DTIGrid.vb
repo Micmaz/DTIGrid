@@ -15,55 +15,55 @@ Public Class DTIGrid
     <System.ComponentModel.Description("Occurs after the server control binds to a data source.")> _
     Public Event DataBound()
 
-    ''' <summary>
-    ''' Occurs when a row is created in a GridView control.
-    ''' </summary>
-    ''' <param name="row"></param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs when a row is created in a GridView control.")> _
-    Public Event RowAdded(ByRef row As DTIGridRow)
+	''' <summary>
+	''' Occurs when a row is created in a GridView control.
+	''' </summary>
+	''' <param name="row"></param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs when a row is created in a GridView control.")>
+	Public Event RowAdded(row As DTIGridRow)
 
-    ''' <summary>
-    ''' Occurs when a data row is bound to data in a GridView control.
-    ''' </summary>
-    ''' <param name="row">DTIGridRow being bound</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs when a data row is bound to data in a GridView control.")> _
-    Public Event RowDataBound(ByRef row As DTIGridRow)
+	''' <summary>
+	''' Occurs when a data row is bound to data in a GridView control.
+	''' </summary>
+	''' <param name="row">DTIGridRow being bound</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs when a data row is bound to data in a GridView control.")>
+	Public Event RowDataBound(row As DTIGridRow)
 
-    ''' <summary>
-    ''' Occurs on postback after the GridView control updates the row.
-    ''' </summary>
-    ''' <param name="row">Updated Row</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs on postback after the GridView control updates the row.")> _
-    Public Event RowUpdated(ByRef row As DTIGridRow)
+	''' <summary>
+	''' Occurs on postback after the GridView control updates the row.
+	''' </summary>
+	''' <param name="row">Updated Row</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs on postback after the GridView control updates the row.")>
+	Public Event RowUpdated(row As DTIGridRow)
 
-    ''' <summary>
-    ''' Occurs on postback after the GridView control deletes the row.
-    ''' </summary>
-    ''' <param name="row">Delted Row</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs on postback after the GridView control deletes the row.")> _
-    Public Event RowDeleted(ByRef row As DTIGridRow)
+	''' <summary>
+	''' Occurs on postback after the GridView control deletes the row.
+	''' </summary>
+	''' <param name="row">Delted Row</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs on postback after the GridView control deletes the row.")>
+	Public Event RowDeleted(row As DTIGridRow)
 
-    ''' <summary>
-    ''' Occurs after a new DTIGridColumn has be created.
-    ''' </summary>
-    ''' <param name="col">DTIGridColumn that has been created.</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs after a new DTIGridColumn has be created.")> _
-    Public Event ColumnCreated(ByRef col As DTIGridColumn)
+	''' <summary>
+	''' Occurs after a new DTIGridColumn has be created.
+	''' </summary>
+	''' <param name="col">DTIGridColumn that has been created.</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs after a new DTIGridColumn has be created.")>
+	Public Event ColumnCreated(col As DTIGridColumn)
 
-    ''' <summary>
-    ''' Occurs when a column is clicked only when sorting is enabled.
-    ''' </summary>
-    ''' <param name="SortColumn">Column clicked for sorting</param>
-    ''' <param name="SortDirection">Direction column is to be sorted Asc or Desc</param>
-    ''' <param name="SearchColumn">Column Searched on if applicable</param>
-    ''' <param name="SearchValue">Value Searched for is applicable</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs when a column is clicked only when sorting is enabled.")> _
+	''' <summary>
+	''' Occurs when a column is clicked only when sorting is enabled.
+	''' </summary>
+	''' <param name="SortColumn">Column clicked for sorting</param>
+	''' <param name="SortDirection">Direction column is to be sorted Asc or Desc</param>
+	''' <param name="SearchColumn">Column Searched on if applicable</param>
+	''' <param name="SearchValue">Value Searched for is applicable</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs when a column is clicked only when sorting is enabled.")> _
     Public Event Sorting(ByVal SortColumn As String, ByVal SortDirection As String, ByVal SearchColumn As String, ByVal SearchValue As String)
 
     ''' <summary>
@@ -82,20 +82,20 @@ Public Class DTIGrid
     <System.ComponentModel.Description("Occurs after all rows have been processed")> _
     Public Event UpdatesComplete As EventHandler
 
-    ''' <summary>
-    ''' Occurs when Autopostback is set to true and a row has been clicked.
-    ''' </summary>
-    ''' <param name="row">Rows Selected</param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Occurs when Autopostback is set to true and a row has been clicked.")> _
-    Public Event Click(ByRef row As DTIGridRow)
+	''' <summary>
+	''' Occurs when Autopostback is set to true and a row has been clicked.
+	''' </summary>
+	''' <param name="row">Rows Selected</param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Occurs when Autopostback is set to true and a row has been clicked.")>
+	Public Event Click(row As DTIGridRow)
 
-    ''' <summary>
-    ''' Fired whenever the page changes
-    ''' </summary>
-    ''' <param name="index"></param>
-    ''' <remarks></remarks>
-    <System.ComponentModel.Description("Fired whenever the page changes")> _
+	''' <summary>
+	''' Fired whenever the page changes
+	''' </summary>
+	''' <param name="index"></param>
+	''' <remarks></remarks>
+	<System.ComponentModel.Description("Fired whenever the page changes")> _
     Public Event PageChanged(ByVal index As Integer)
 
     ''' <summary>
@@ -983,7 +983,7 @@ Public Class DTIGrid
 		btnLast.Enabled = False
 	End Sub
 
-	Private Sub DTIGrid_Databinding() Handles Me.Databinding
+	Public Sub DTIGrid_Databinding() Handles Me.Databinding
 		If DesignMode Then Return
 		If Page.IsPostBack AndAlso dt IsNot Nothing Then
 
@@ -1019,25 +1019,25 @@ Public Class DTIGrid
 		End If
 	End Sub
 
-    Protected Overridable Sub DTIGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
-        'jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
-        jQueryLibrary.jQueryInclude.RegisterJQueryUI(Page)
-        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-3.8.2.min.js", , True)
-        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.1.2.min.js", , True)
-        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.5.2.min.js", , True)
-        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqgrid.min.js", , True)
-        'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.4.3.min.js", , True)
-        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/DTIDataGrid.js", , True)
-        jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/ui.jqgrid.css", "text/css", True)
-        If ShowDateAndTime Then
-            jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.timepicker.js", , True)
-            jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jqueryTimepicker.css", "text/css", True)
-        End If
-        changeInnerControlIds()
-    End Sub
+	Protected Overridable Sub DTIGrid_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+		'jQueryLibrary.jQueryInclude.RegisterJQueryUIThemed(Page)
+		jQueryLibrary.jQueryInclude.RegisterJQueryUI(Page)
+		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-3.8.2.min.js", , True)
+		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.1.2.min.js", , True)
+		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.5.2.min.js", , True)
+		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqgrid.min.js", , True)
+		'jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.jqGrid-4.4.3.min.js", , True)
+		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/DTIDataGrid.js", , True)
+		jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/ui.jqgrid.css", "text/css", True)
+		If ShowDateAndTime Then
+			jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jquery.timepicker.js", , True)
+			jQueryLibrary.jQueryInclude.addScriptFile(Page, "DTIGrid/jqueryTimepicker.css", "text/css", True)
+		End If
+		changeInnerControlIds()
+	End Sub
 
 #Region "button clicks"
-    Private Sub btnSort_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSort.Click
+	Private Sub btnSort_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnSort.Click
 		Dim btnClientID As String = CType(sender, Button).ClientID
 		If btnClientID.IndexOf(Me.ClientID) > -1 Then
 			Dim sorStr As String = sPostbackData.Value 'Me.Page.Request.Form(sPostbackData.ClientID)
